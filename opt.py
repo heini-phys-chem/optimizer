@@ -6,6 +6,7 @@ from scipy.optimize import minimize
 from scipy.optimize import fmin_bfgs
 from scipy.optimize import fmin_ncg
 from scipy.optimize import fmin_cg
+from scipy.optimize import fmin
 
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -44,26 +45,20 @@ def plot_function():
 
 	data = np.array([])
 
-	fig, ax = plt.subplots()
-
 	for i in range(len(X0)):
 		for j in range(len(Y0)):
 			value = rosen( np.array([ float(X0[i]), float(Y0[j]) ]) )
 			data = np.append(data, float(value))
 
 	data = data.reshape(len(X0), len(Y0))
-	sns.heatmap(data, cmap='gist_rainbow', ax=ax)
-
-	ax.yaxis.set_major_locator(plt.NullLocator())
-	ax.xaxis.set_major_formatter(plt.NullFormatter())
-
+	sns.heatmap(data, cmap='gist_raibbow')
 	plt.show()
 
 def minimize(x0):
 #	res = minimize(rosen, starting_point, method='BFGS', jac=rosen_der,options={'disp': True})
 #	fmin_bfgs(rosen, starting_point)
 #	fmin_ncg(rosen, x0, rosen_der, fhess=rosen_hess, avextol=1e-8)
-	fmin_ncg(rosen, x0, rosen_der)
+	fmin(rosen, x0)
 
 if __name__ == "__main__":
 
@@ -72,8 +67,8 @@ if __name__ == "__main__":
 	y = float(sys.argv[2])
 
 	starting_point = np.array([x, y])
-	#minimize(starting_point)
+	minimize(starting_point)
 	#print(x,y)
 
 
-	plot_function()
+	#plot_function()
