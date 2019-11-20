@@ -3,6 +3,9 @@
 import sys
 import numpy as np
 from scipy.optimize import minimize
+from scipy.optimize import fmin_bfgs
+from scipy.optimize import fmin_ncg
+from scipy.optimize import fmin_cg
 
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -22,12 +25,26 @@ def rosen_der(x):
 
 	return der
 
-def plot_data():
+def rosen_hess(x):
+	x = np.asarray(x)
+	H = np.diag(-400*x[:-1],1) - np.diag(400*x[:-1],-1)
+	diagonal = np.zeros_like(x)
+	diagonal[0] = 1200*x[0]**2-400*x[1]+2
+	diagonal[-1] = 200
+	diagonal[1:-1] = 202 + 1200*x[1:-1]**2 - 400*x[2:]
+	H = H + np.diag(diagonal)
 
-	X0 = np.arange(start=-1.5, stop=2.0, step=0.3)
-	Y0 = np.arange(start=-0.5, stop=3.0, step=0.3)
+	return H
+
+
+def plot_function():
+
+	X0 = np.arange(start=-2.0, stop=2.0, step=0.05)
+	Y0 = np.arange(start=-1.0, stop=3.0, step=0.05)
 
 	data = np.array([])
+
+	fig, ax = plt.subplots()
 
 	for i in range(len(X0)):
 		for j in range(len(Y0)):
@@ -35,38 +52,28 @@ def plot_data():
 			data = np.append(data, float(value))
 
 	data = data.reshape(len(X0), len(Y0))
-	sns.heatmap(data, cmap='coolwarm')
+	sns.heatmap(data, cmap='gist_rainbow', ax=ax)
+
+	ax.yaxis.set_major_locator(plt.NullLocator())
+	ax.xaxis.set_major_formatter(plt.NullFormatter())
+
 	plt.show()
 
-def minimize(starting_point)
-	res = minimize(rosen, starting_point, method='BFGS', jac=rosen_der,options={'disp': True})
+def minimize(x0):
+#	res = minimize(rosen, starting_point, method='BFGS', jac=rosen_der,options={'disp': True})
+#	fmin_bfgs(rosen, starting_point)
+#	fmin_ncg(rosen, x0, rosen_der, fhess=rosen_hess, avextol=1e-8)
+	fmin_ncg(rosen, x0, rosen_der)
 
 if __name__ == "__main__":
 
-	plot_function(X0, Y0)
 
-	starting_point = [-.5, .5]
-	minimize(starting_point)
+	x = float(sys.argv[1])
+	y = float(sys.argv[2])
 
-'''
-Nfeval = 1
+	starting_point = np.array([x, y])
+	#minimize(starting_point)
+	#print(x,y)
 
-def rosen(X): #Rosenbrock function
-    return (1.0 - X[0])**2 + 100.0 * (X[1] - X[0]**2)**2 + \
-           (1.0 - X[1])**2 + 100.0 * (X[2] - X[1]**2)**2
 
-def callbackF(Xi):
-    global Nfeval
-    print '{0:4d}   {1: 3.6f}   {2: 3.6f}   {3: 3.6f}   {4: 3.6f}'.format(Nfeval, Xi[0], Xi[1], Xi[2], rosen(Xi))
-    Nfeval += 1
-
-print  '{0:4s}   {1:9s}   {2:9s}   {3:9s}   {4:9s}'.format('Iter', ' X1', ' X2', ' X3', 'f(X)')
-x0 = np.array([1.1, 1.1, 1.1], dtype=np.double)
-[xopt, fopt, gopt, Bopt, func_calls, grad_calls, warnflg] = \
-    fmin_bfgs(rosen,
-              x0,
-              callback=callbackF,
-              maxiter=2000,
-              full_output=True,
-              retall=False)
-'''
+	plot_function()
