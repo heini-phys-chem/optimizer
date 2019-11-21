@@ -4,61 +4,76 @@ import sys
 import numpy as np
 from scipy.optimize import minimize
 from scipy.optimize import fmin_bfgs
-from scipy.optimize import fmin_ncg
-from scipy.optimize import fmin_cg
-from scipy.optimize import fmin
 
 import matplotlib.pyplot as plt
-import seaborn as sns
+#import seaborn as sns
 
-def rosen(x):
-	return sum(100.0*(x[1:]-x[:-1]**2.0)**2.0 + (1-x[:-1])**2.0)
-
-def rosen_der(x):
-	xm    = x[1:-1]
-	xm_m1 = x[:-2]
-	xm_p1 = x[2:]
-
-	der = np.zeros_like(x)
-	der[1:-1] = 200/(xm-xm_m1**2) - 400*(xm_p1 - xm**2)*xm - 2*(1-xm)
-	der[0]    = -400*x[0]*(x[1]-x[0]**2) - 2*(1-x[0])
-	der[-1]   = 200*(x[-1]-x[-2]**2)
-
-	return der
-
-def rosen_hess(x):
-	x = np.asarray(x)
-	H = np.diag(-400*x[:-1],1) - np.diag(400*x[:-1],-1)
-	diagonal = np.zeros_like(x)
-	diagonal[0] = 1200*x[0]**2-400*x[1]+2
-	diagonal[-1] = 200
-	diagonal[1:-1] = 202 + 1200*x[1:-1]**2 - 400*x[2:]
-	H = H + np.diag(diagonal)
-
-	return H
+from numdifftools import Jacobian, Hessian
 
 
-def plot_function():
+''' Functions '''
+def trid(X):
+	x = X[0]
+	y = X[1]
+	return (x-1)**2 + (y-1)**2 - x*y
 
-	X0 = np.arange(start=-2.0, stop=2.0, step=0.05)
-	Y0 = np.arange(start=-1.0, stop=3.0, step=0.05)
+def rosen(X):
+	x = X[0]
+	y = X[1]
+	return (1-x)**2 + 100*(y - x**2)**2
 
-	data = np.array([])
+def beale(X):
+	x = X[0]
+	y = X[1]
+	return (1.5 - x + x*y)**2 + (2.25 - x + x*y**2)**2 + (2.65 - x + x*y**3)**2
 
-	for i in range(len(X0)):
-		for j in range(len(Y0)):
-			value = rosen( np.array([ float(X0[i]), float(Y0[j]) ]) )
-			data = np.append(data, float(value))
+def booth(X):
+	x = X[0]
+	y = X[1]
+	return (x + 2*y - 7)**2 + (2*x + y - 5)**2
 
-	data = data.reshape(len(X0), len(Y0))
-	sns.heatmap(data, cmap='gist_raibbow')
+def himmelblau(X):
+	x = X[0]
+	y = X[1]
+	return (x**2 + y -11)**2 + (x + y**2 -7)**2
+
+''' First derivation '''
+def func_der(x, func=booth):
+    return Jacobian(lambda x: func(x))(x).ravel()
+
+''' Second derivation '''
+def func_hess(x, func=rosen):
+    return Hessian(lambda x: func(x))(x)
+
+''' Plotting the stuff '''
+def plot_function(func, func_name):
+
+	if func_name == 'rosen':
+		xmin, xmax, xstep = -2.0, 2.0, .05
+		ymin, ymax, ystep = -1.0, 3.0, .05
+
+	else:
+		xmin, xmax, xstep = -5., 5., .05
+		ymin, ymax, ystep = -5., 5., .05
+
+	X = np.arange(xmin, xmax + xstep, xstep)
+	Y = np.arange(ymin, ymax + ystep, ystep)
+
+	x, y = np.meshgrid(X, Y)
+
+	z = func(np.array([x, y]))
+
+	plt.imshow(z, extent=[0, len(x[0])-1, 0, len(y[0])-1], origin='lower', cmap='viridis')
+	plt.colorbar()
+	plt.contour(z, 15, colors='white');
+
 	plt.show()
 
-def minimize(x0):
-#	res = minimize(rosen, starting_point, method='BFGS', jac=rosen_der,options={'disp': True})
-#	fmin_bfgs(rosen, starting_point)
-#	fmin_ncg(rosen, x0, rosen_der, fhess=rosen_hess, avextol=1e-8)
-	fmin(rosen, x0)
+def opt_the_shit(x0, func):
+	#res = minimize(func, x0, method='BFGS', jac=func_der, hess=func_hess)
+	minimize(func, x0, method='BFGS', jac=func_der, options={'disp': True})
+#	fmin_bfgs(func, x0, fprime=func_der(, rosen))
+
 
 if __name__ == "__main__":
 
@@ -67,8 +82,6 @@ if __name__ == "__main__":
 	y = float(sys.argv[2])
 
 	starting_point = np.array([x, y])
-	minimize(starting_point)
-	#print(x,y)
+	opt_the_shit(starting_point, booth)
 
-
-	#plot_function()
+	#plot_function(himmelblau, 'himmelblau')
