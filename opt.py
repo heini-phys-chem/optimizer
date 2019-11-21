@@ -3,10 +3,8 @@
 import sys
 import numpy as np
 from scipy.optimize import minimize
-from scipy.optimize import fmin_bfgs
 
 import matplotlib.pyplot as plt
-#import seaborn as sns
 
 from numdifftools import Jacobian, Hessian
 
