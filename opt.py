@@ -36,17 +36,17 @@ def himmelblau(X):
 	return (x**2 + y -11)**2 + (x + y**2 -7)**2
 
 ''' First derivation '''
-def func_der(x, func=booth):
+def func_der(x, func=himmelblau):
     return Jacobian(lambda x: func(x))(x).ravel()
 
 ''' Second derivation '''
-def func_hess(x, func=rosen):
+def func_hess(x, func=himmelblau):
     return Hessian(lambda x: func(x))(x)
 
 ''' Plotting the stuff '''
 def plot_function(func, func_name):
 
-	if func_name == 'rosen':
+	if func_name == 'Rosenbrock':
 		xmin, xmax, xstep = -2.0, 2.0, .05
 		ymin, ymax, ystep = -1.0, 3.0, .05
 
@@ -57,13 +57,36 @@ def plot_function(func, func_name):
 	X = np.arange(xmin, xmax + xstep, xstep)
 	Y = np.arange(ymin, ymax + ystep, ystep)
 
-	x, y = np.meshgrid(X, Y)
+	#x, y = np.meshgrid(X, Y)
+	x, y = np.mgrid[-2:2:100j, -1:3:100j]
+	#x, y = np.mgrid[-5:5:100j, -5:5:100j]
 
 	z = func(np.array([x, y]))
 
-	plt.imshow(z, extent=[0, len(x[0])-1, 0, len(y[0])-1], origin='lower', cmap='viridis')
-	plt.colorbar()
-	plt.contour(z, 15, colors='white');
+	plt.imshow(z, extent=[xmin, xmax, ymin, ymax], origin='lower', cmap='viridis')
+	#plt.imshow(z, extent=[xmin, xmax, ymin, ymax], cmap='viridis')
+#	plt.imshow(z, origin='lower', cmap='viridis')
+	cbar = plt.colorbar()
+	cbar.ax.tick_params(labelsize=20)
+
+	#i, j = np.unravel_index(z.argmin(), z.shape)
+
+	plt.scatter(1,1, marker='*', color='white')
+#	plt.scatter(2,3, marker='*', color='white')
+#	plt.scatter(3.131312,-2.805118, marker='*', color='white')
+#	plt.scatter(-3.2283186,-3.779310, marker='*', color='white')
+#	plt.scatter(-1.848126,3.584428,  marker='*', color='white')
+
+	plt.contour(z, 10, extent=[xmin, xmax, ymin, ymax], colors='white');
+	#plt.contour(z, 15, extent=[xmin, xmax, ymin, ymax], colors='white');
+
+	plt.xlim(xmin, xmax)
+	plt.ylim(ymin, ymax)
+#	plt.scatter(i, j, marker='*', color='white')
+
+
+	plt.title(func_name, fontsize=30)
+#	plt.axis('off')
 
 	plt.show()
 
@@ -80,6 +103,7 @@ if __name__ == "__main__":
 	y = float(sys.argv[2])
 
 	starting_point = np.array([x, y])
-	opt_the_shit(starting_point, booth)
+	#opt_the_shit(starting_point, himmelblau)
 
-	#plot_function(himmelblau, 'himmelblau')
+	plot_function(rosen, 'Rosenbrock')
+	#plot_function(himmelblau, 'Himmelblau')
