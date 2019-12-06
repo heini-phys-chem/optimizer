@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 
 from numdifftools import Jacobian, Hessian
 
+plt.rcParams.update({'font.size': 25})
 
 ''' Functions '''
 def trid(X):
@@ -57,38 +58,39 @@ def plot_function(func, func_name):
 	X = np.arange(xmin, xmax + xstep, xstep)
 	Y = np.arange(ymin, ymax + ystep, ystep)
 
-	#x, y = np.meshgrid(X, Y)
-	x, y = np.mgrid[-2:2:100j, -1:3:100j]
+	x, y = np.meshgrid(X, Y)
+	#x, y = np.mgrid[-2:2:100j, -1:3:100j]
 	#x, y = np.mgrid[-5:5:100j, -5:5:100j]
 
 	z = func(np.array([x, y]))
+
+	fig = plt.figurefigsize=(8, 8)
 
 	plt.imshow(z, extent=[xmin, xmax, ymin, ymax], origin='lower', cmap='viridis')
 	#plt.imshow(z, extent=[xmin, xmax, ymin, ymax], cmap='viridis')
 #	plt.imshow(z, origin='lower', cmap='viridis')
 	cbar = plt.colorbar()
-	cbar.ax.tick_params(labelsize=20)
+	cbar.ax.tick_params(labelsize=25)
 
 	#i, j = np.unravel_index(z.argmin(), z.shape)
 
 	plt.scatter(1,1, marker='*', color='white')
-#	plt.scatter(2,3, marker='*', color='white')
-#	plt.scatter(3.131312,-2.805118, marker='*', color='white')
-#	plt.scatter(-3.2283186,-3.779310, marker='*', color='white')
-#	plt.scatter(-1.848126,3.584428,  marker='*', color='white')
+	#plt.scatter(2,3, marker='*', color='white')
+	#plt.scatter(3.131312,-2.805118, marker='*', color='white')
+	#plt.scatter(-3.2283186,-3.779310, marker='*', color='white')
+	#plt.scatter(-1.848126,3.584428,  marker='*', color='white')
+	nlevels = 10
+	levels = np.percentile(z, np.linspace(0, 100, nlevels))
 
-	plt.contour(z, 10, extent=[xmin, xmax, ymin, ymax], colors='white');
+	plt.contour(z, 10, levels=levels, extent=[xmin, xmax, ymin, ymax], colors='white');
 	#plt.contour(z, 15, extent=[xmin, xmax, ymin, ymax], colors='white');
 
 	plt.xlim(xmin, xmax)
 	plt.ylim(ymin, ymax)
 #	plt.scatter(i, j, marker='*', color='white')
 
-
-	plt.title(func_name, fontsize=30)
-#	plt.axis('off')
-
-	plt.show()
+	plt.savefig(str(func_name) + ".pdf")
+	#plt.show()
 
 def opt_the_shit(x0, func):
 	#res = minimize(func, x0, method='BFGS', jac=func_der, hess=func_hess)
